@@ -104,6 +104,13 @@ with tab1:
     st.subheader("🖼 Sample Products")
     cols = st.columns(5)
 
+    # 🔥 ADD THIS ABOVE LOOP
+    import random
+
+
+    def get_fallback_image():
+        return f"https://picsum.photos/200?random={random.randint(1, 10000)}"
+
 
     @st.cache_data
     def get_top_products(df):
@@ -117,15 +124,16 @@ with tab1:
     for idx, (_, row) in enumerate(top_products.iterrows()):
         with cols[idx]:
             try:
-                img = row['image_url']
+                img = row.get('image_url')
 
-                if not img or not isinstance(img, str) or not img.startswith("http"):
-                    img = PLACEHOLDER
-
-                st.image(img, use_container_width=True)
+                # ✅ Try dataset image first
+                if img and isinstance(img, str) and img.startswith("http"):
+                    st.image(img, use_container_width=True)
+                else:
+                    st.image(get_fallback_image(), use_container_width=True)
 
             except:
-                st.image(PLACEHOLDER, use_container_width=True)
+                st.image(get_fallback_image(), use_container_width=True)
 
             st.caption(row['product_name'][:40])
 
