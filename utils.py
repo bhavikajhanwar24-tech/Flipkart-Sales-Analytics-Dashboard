@@ -30,26 +30,33 @@ def add_features(df):
     df = df.copy()
 
     df['discount_percent'] = (
-                                     (df['retail_price'] - df['discounted_price']) / df['retail_price']
-                             ) * 100
+        (df['retail_price'] - df['discounted_price']) / df['retail_price']
+    ) * 100
 
     # Clean category
     df['product_category_tree'] = df['product_category_tree'].astype(str)
     df['product_category_tree'] = df['product_category_tree'].str.replace(r'[\[\]\"]', '', regex=True)
-    df['main_category'] = (
-    df['product_category_tree']
-    .str.split(">>").str[0]
-    .str.strip()
-    .str.title())
 
-    # 🔥 FIX IMAGE COLUMN
+    df['main_category'] = (
+        df['product_category_tree']
+        .str.split(">>").str[0]
+        .str.strip()
+        .str.title()
+    )
+
+    # ✅ STRONG IMAGE FIX
     def extract_image(img):
         try:
-            img_list = ast.literal_eval(img)  # convert string → list
-            if isinstance(img_list, list) and len(img_list) > 0:
-                return img_list[0]  # take first image
+            img_list = ast.literal_eval(img)
+
+            if isinstance(img_list, list):
+                for url in img_list:
+                    if isinstance(url, str) and url.startswith("http"):
+                        return url  # return FIRST VALID URL
+
         except:
             return None
+
         return None
 
     df['image_url'] = df['image'].apply(extract_image)

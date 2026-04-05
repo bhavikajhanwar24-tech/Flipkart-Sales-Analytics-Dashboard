@@ -104,13 +104,29 @@ with tab1:
     st.subheader("🖼 Sample Products")
     cols = st.columns(5)
 
-    for idx, (_, row) in enumerate(filtered_df.head(5).iterrows()):
+
+    @st.cache_data
+    def get_top_products(df):
+        return df.head(5)
+
+
+    top_products = get_top_products(filtered_df)
+
+    cols = st.columns(5)
+
+    for idx, (_, row) in enumerate(top_products.iterrows()):
         with cols[idx]:
             try:
-                if row['image_url']:
-                    st.image(row['image_url'], use_container_width=True)
+                img = row['image_url']
+
+                if not img or not isinstance(img, str) or not img.startswith("http"):
+                    img = PLACEHOLDER
+
+                st.image(img, use_container_width=True)
+
             except:
-                st.write("No Image")
+                st.image(PLACEHOLDER, use_container_width=True)
+
             st.caption(row['product_name'][:40])
 
     st.subheader("📊 Price Distribution")
